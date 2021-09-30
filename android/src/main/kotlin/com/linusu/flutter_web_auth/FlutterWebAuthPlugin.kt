@@ -3,6 +3,8 @@ package com.linusu.flutter_web_auth
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.content.pm.PackageManager
+import android.text.TextUtils
 
 import androidx.browser.customtabs.CustomTabsIntent
 
@@ -19,6 +21,9 @@ class FlutterWebAuthPlugin(private var context: Context? = null, private var cha
     public val callbacks = mutableMapOf<String, Result>()
     public var urlScheme: String? = null
     public var tabOpened = false
+    public val PACKAGE_NAME = "com.android.chrome"
+    public PackageManager packageManager = context.getPackageManager()
+    List<ResolveInfo> resolveInfoList = packageManager.queryIntentActivities(customTabsIntent.intent, PackageManager.MATCH_DEFAULT_ONLY)
 
     @JvmStatic
     fun registerWith(registrar: Registrar) {
@@ -52,9 +57,18 @@ class FlutterWebAuthPlugin(private var context: Context? = null, private var cha
 
           callbacks[callbackUrlScheme] = resultCallback
           urlScheme = callbackUrlScheme
-          
+
           val intent = CustomTabsIntent.Builder().build()
           val keepAliveIntent = Intent(context, KeepAliveService::class.java)
+
+          val packageManager = context?.packageManager
+          val resolveInfoList = packageManager?.queryIntentActivities(intent.intent, PackageManager.MATCH_DEFAULT_ONLY)
+
+          for (resolveInfo in resolveInfoList.orEmpty()) {
+              val packageName = resolveInfo.activityInfo.packageName
+              if (TextUtils.equals(packageName, PACKAGE_NAME))
+                  intent.intent.setPackage(PACKAGE_NAME)
+          }
 
           intent.intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
           if (preferEphemeral) {
