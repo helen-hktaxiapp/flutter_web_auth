@@ -26,6 +26,19 @@ class FlutterWebAuthPlugin(private var context: Context? = null, private var cha
         plugin.initInstance(registrar.messenger(), registrar.context())
     }
 
+    // MainActivity.java
+    // 
+    // @Override
+    // protected void onResume() {
+    //     FlutterWebAuthPlugin.Companion.checkTabOpened();
+    //     super.onResume();
+    // }
+    public fun checkTabOpened() {
+        if (tabOpened) {
+            callbacks.remove(urlScheme)?.success("fail")
+            tabOpened = false
+        }
+    }
   }
 
   fun initInstance(messenger: BinaryMessenger, context: Context) {
