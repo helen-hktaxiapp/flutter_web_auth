@@ -22,8 +22,6 @@ class FlutterWebAuthPlugin(private var context: Context? = null, private var cha
     public var urlScheme: String? = null
     public var tabOpened = false
     public val PACKAGE_NAME = "com.android.chrome"
-    public PackageManager packageManager = context.getPackageManager()
-    List<ResolveInfo> resolveInfoList = packageManager.queryIntentActivities(customTabsIntent.intent, PackageManager.MATCH_DEFAULT_ONLY)
 
     @JvmStatic
     fun registerWith(registrar: Registrar) {
