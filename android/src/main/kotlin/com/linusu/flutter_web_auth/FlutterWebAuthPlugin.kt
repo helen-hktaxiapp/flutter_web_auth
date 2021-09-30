@@ -16,7 +16,9 @@ import io.flutter.plugin.common.PluginRegistry.Registrar
 
 class FlutterWebAuthPlugin(private var context: Context? = null, private var channel: MethodChannel? = null): MethodCallHandler, FlutterPlugin {
   companion object {
-    val callbacks = mutableMapOf<String, Result>()
+    public val callbacks = mutableMapOf<String, Result>()
+    public var urlScheme: String? = null
+    public var tabOpened = false
 
     @JvmStatic
     fun registerWith(registrar: Registrar) {
@@ -49,7 +51,8 @@ class FlutterWebAuthPlugin(private var context: Context? = null, private var cha
           val preferEphemeral = call.argument<Boolean>("preferEphemeral")!!
 
           callbacks[callbackUrlScheme] = resultCallback
-
+          urlScheme = callbackUrlScheme
+          
           val intent = CustomTabsIntent.Builder().build()
           val keepAliveIntent = Intent(context, KeepAliveService::class.java)
 
@@ -58,7 +61,7 @@ class FlutterWebAuthPlugin(private var context: Context? = null, private var cha
               intent.intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
           }
           intent.intent.putExtra("android.support.customtabs.extra.KEEP_ALIVE", keepAliveIntent)
-
+          tabOpened = true
           intent.launchUrl(context, url)
         }
         "cleanUpDanglingCalls" -> {
