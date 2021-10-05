@@ -15,6 +15,7 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry.Registrar
+import android.util.Log
 
 class FlutterWebAuthPlugin(private var context: Context? = null, private var channel: MethodChannel? = null): MethodCallHandler, FlutterPlugin {
   companion object {
@@ -72,15 +73,16 @@ class FlutterWebAuthPlugin(private var context: Context? = null, private var cha
           val intent = CustomTabsIntent.Builder().build()
           val keepAliveIntent = Intent(context, KeepAliveService::class.java)
 
-          val packageManager = context?.packageManager
-          val resolveInfoList = packageManager?.queryIntentActivities(intent.intent, PackageManager.MATCH_DEFAULT_ONLY)
-
-          for (resolveInfo in resolveInfoList.orEmpty()) {
-              val packageName = resolveInfo.activityInfo.packageName
-              if (TextUtils.equals(packageName, PACKAGE_NAME))
-                  intent.intent.setPackage(PACKAGE_NAME)
+          val packageManager = context!!.packageManager
+          val browserIntent = Intent(Intent.ACTION_VIEW, url)
+          val browsersList = packageManager.queryIntentActivities(browserIntent, PackageManager.MATCH_ALL)
+          Log.d("TAG", "+++print browserlist+++")
+          browsersList.forEach{
+            val packageName = it.activityInfo.packageName
+            Log.d("TAG", packageName)
           }
-
+          Log.d("TAG", browsersList.first().activityInfo.packageName)
+          intent.intent.setPackage(browsersList.first().activityInfo.packageName)
           intent.intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
           if (preferEphemeral) {
               intent.intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
